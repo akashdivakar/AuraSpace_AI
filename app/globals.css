@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+}
+
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* GPU Accelerated & Anti-Flicker Animation Utilities */
+@layer utilities {
+  .animate-slide-in-left {
+    animation: slideInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .animate-slide-in-top {
+    animation: slideInTop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .animate-slide-in-bottom {
+    animation: slideInBottom 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-float-slow {
+    animation: float 9s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 4s ease-in-out infinite;
+    will-change: transform, opacity;
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradientX 5s ease infinite;
+  }
+
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-40px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInTop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -30px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInBottom {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale3d(0.95, 0.95, 1) translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0) rotate(1deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale3d(1.05, 1.05, 1);
+  }
+}
+
+@keyframes gradientX {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
