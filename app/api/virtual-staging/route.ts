@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import Decor8AI from 'decor8ai';
 
-const client = new Decor8AI();
-
 export async function POST(request: Request) {
+  const client = new Decor8AI();
   try {
     const formData = await request.formData();
     const image = formData.get('image') as File | null;

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import Decor8AI from 'decor8ai';
 
-const client = new Decor8AI();
-
 export async function POST(request: Request) {
+  const client = new Decor8AI();
   try {
     const body = await request.json();
     const { roomType, designStyle, prompt, numImages = 1 } = body;
