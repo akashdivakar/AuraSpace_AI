@@ -32,6 +32,21 @@ export default function InspirationalDesignPage() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [elapsed, setElapsed] = useState(0);
+  const ESTIMATED_SECONDS = 25;
+
+  useEffect(() => {
+    let interval: any;
+    if (loading) {
+      setElapsed(0);
+      interval = setInterval(() => {
+        setElapsed((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setElapsed(0);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const [activeEntry, setActiveEntry] = useState<InspirationEntry | null>(null);
   const [history, setHistory] = useState<InspirationEntry[]>([]);
@@ -216,9 +231,45 @@ export default function InspirationalDesignPage() {
             )}
 
             {loading && (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="w-16 h-16 rounded-full border-4 border-violet-100 dark:border-violet-950 border-t-violet-600 animate-spin"></div>
-                <p className="font-medium text-slate-600 dark:text-slate-300 animate-pulse">Dreaming up your concept...</p>
+              <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6 max-w-md mx-auto w-full">
+                <div className="w-full space-y-3">
+                  <div className="flex items-center justify-between text-sm font-semibold">
+                    <span className="text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-600"></span>
+                      </span>
+                      Dreaming up your concept...
+                    </span>
+                    <span className="text-violet-600 dark:text-violet-400 font-bold">
+                      {Math.min(95, Math.round((elapsed / ESTIMATED_SECONDS) * 100))}%
+                    </span>
+                  </div>
+
+                  {/* Progress bar container */}
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner">
+                    <div 
+                      className="h-full bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                      style={{ width: `${Math.min(95, Math.round((elapsed / ESTIMATED_SECONDS) * 100))}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  {/* Remaining time & status indicator */}
+                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
+                    <span>
+                      {elapsed < ESTIMATED_SECONDS 
+                        ? `Estimated remaining time: ~${Math.max(1, ESTIMATED_SECONDS - elapsed)}s`
+                        : 'Finalizing high-res render...'}
+                    </span>
+                    <span className="font-mono font-medium">{elapsed}s elapsed</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-center text-slate-400 dark:text-slate-500 max-w-xs">
+                  AI is crafting the architecture, lighting balance, and curated furniture layout.
+                </p>
               </div>
             )}
 
