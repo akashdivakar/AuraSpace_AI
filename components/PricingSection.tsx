@@ -44,7 +44,7 @@ export default function PricingSection() {
 
         {/* Pricing Cards Grid (in ₹ Rupees) */}
         <AnimateIn from="bottom" delay={100}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-8 items-stretch">
             
             {/* Plan 1: Free Trial */}
             <div className={`bg-white dark:bg-slate-900 rounded-3xl border p-8 flex flex-col justify-between shadow-lg transition-all relative ${
