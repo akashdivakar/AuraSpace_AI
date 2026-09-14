@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingBag, ExternalLink, ChevronDown, ChevronUp, Tag, Sparkles, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
+import { ShoppingBag, ExternalLink, ChevronDown, ChevronUp, Tag, Sparkles, CheckCircle2, Building2, ArrowRight } from 'lucide-react';
 
 export interface ProductItem {
   id: string;
@@ -183,6 +184,26 @@ export default function ProductBreakdown({ roomType = 'LIVINGROOM', designStyle 
             <span className="font-extrabold text-sm text-indigo-700 dark:text-indigo-300">
               ₹{totalPrice.toLocaleString('en-IN')}
             </span>
+          </div>
+
+          {/* Turnkey Interior Consultation Partner Callout */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-3 border border-indigo-800 shadow-md">
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-bold">Want turnkey execution for this {roomType.toLowerCase()} design?</p>
+                <p className="text-[11px] text-indigo-200">Collab with top studios (Livspace, HomeLane, Design Cafe) for free site measurement & customized 3D plan.</p>
+              </div>
+            </div>
+            <Link
+              href="/consultation"
+              className="flex-shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow transition-all hover:scale-105 flex items-center gap-1.5 whitespace-nowrap"
+            >
+              <span>Book Consultation</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       )}

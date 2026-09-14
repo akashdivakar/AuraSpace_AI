@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, Trash2 } from 'lucide-react';
+import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, Trash2, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
 import ProductBreakdown from '../../components/ProductBreakdown';
@@ -77,6 +77,23 @@ export default function InspirationalDesignPage() {
       localStorage.setItem('decor8ai_inspirational_history', JSON.stringify(history));
     }
   }, [history]);
+
+  const handleDownload = async (url: string, filename = 'auraspace-concept.png') => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, '_blank');
+    }
+  };
 
   const handleDeleteEntry = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -230,48 +247,103 @@ export default function InspirationalDesignPage() {
               </div>
             )}
 
-            {loading && (
-              <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6 max-w-md mx-auto w-full">
-                <div className="w-full space-y-3">
-                  <div className="flex items-center justify-between text-sm font-semibold">
-                    <span className="text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-600"></span>
-                      </span>
-                      Dreaming up your concept...
-                    </span>
-                    <span className="text-violet-600 dark:text-violet-400 font-bold">
-                      {Math.min(95, Math.round((elapsed / ESTIMATED_SECONDS) * 100))}%
-                    </span>
-                  </div>
+            {loading && (() => {
+              const radius = 54;
+              const circumference = 2 * Math.PI * radius;
+              // Precise staged progress calculation for inspirational design
+              let progressPercent = 0;
+              let currentStep = 'Generating concept architectural layout...';
 
-                  {/* Progress bar container */}
-                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner">
-                    <div 
-                      className="h-full bg-gradient-to-r from-violet-500 via-indigo-500 to-violet-600 rounded-full transition-all duration-500 ease-out relative overflow-hidden"
-                      style={{ width: `${Math.min(95, Math.round((elapsed / ESTIMATED_SECONDS) * 100))}%` }}
-                    >
-                      <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+              if (elapsed <= 4) {
+                progressPercent = Math.round((elapsed / 4) * 25); // 0 -> 25%
+                currentStep = 'Creating architectural frame & ambient mood...';
+              } else if (elapsed <= 10) {
+                progressPercent = Math.round(25 + ((elapsed - 4) / 6) * 30); // 25 -> 55%
+                currentStep = 'Synthesizing tailored design styles & decor...';
+              } else if (elapsed <= 18) {
+                progressPercent = Math.round(55 + ((elapsed - 10) / 8) * 30); // 55 -> 85%
+                currentStep = 'Rendering textures, material finishes & lighting...';
+              } else if (elapsed <= 25) {
+                progressPercent = Math.round(85 + ((elapsed - 18) / 7) * 10); // 85 -> 95%
+                currentStep = 'Refining photorealistic micro-details...';
+              } else {
+                progressPercent = Math.min(99, 95 + Math.round((elapsed - 25) / 2));
+                currentStep = 'Finalizing concept output...';
+              }
+
+              const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+              const remainingSeconds = Math.max(0, ESTIMATED_SECONDS - elapsed);
+
+              return (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-6 max-w-md mx-auto w-full">
+                  {/* Precise Circular Progress Meter */}
+                  <div className="relative w-40 h-40 flex items-center justify-center">
+                    {/* Background Track Glow */}
+                    <div className="absolute inset-0 bg-violet-500/10 dark:bg-violet-500/20 rounded-full blur-xl animate-pulse"></div>
+
+                    <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 128 128">
+                      {/* Background circle */}
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r={radius}
+                        className="stroke-slate-100 dark:stroke-slate-800"
+                        strokeWidth="8"
+                        fill="transparent"
+                      />
+                      {/* Gradient definition */}
+                      <defs>
+                        <linearGradient id="circleProgressGradInspo" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="50%" stopColor="#a855f7" />
+                          <stop offset="100%" stopColor="#ec4899" />
+                        </linearGradient>
+                      </defs>
+                      {/* Animated Progress Circle */}
+                      <circle
+                        cx="64"
+                        cy="64"
+                        r={radius}
+                        stroke="url(#circleProgressGradInspo)"
+                        strokeWidth="8"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        fill="transparent"
+                        className="transition-all duration-700 ease-out"
+                      />
+                    </svg>
+
+                    {/* Centered Percentage & Time Content */}
+                    <div className="absolute flex flex-col items-center justify-center text-center">
+                      <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                        {progressPercent}%
+                      </span>
+                      <span className="text-[11px] font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mt-0.5">
+                        {remainingSeconds > 0 ? `~${remainingSeconds}s left` : 'Almost Done'}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Remaining time & status indicator */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
-                    <span>
-                      {elapsed < ESTIMATED_SECONDS 
-                        ? `Estimated remaining time: ~${Math.max(1, ESTIMATED_SECONDS - elapsed)}s`
-                        : 'Finalizing high-res render...'}
-                    </span>
-                    <span className="font-mono font-medium">{elapsed}s elapsed</span>
+                  {/* Dynamic Status Text & Subtitle */}
+                  <div className="text-center space-y-2 w-full">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-950/70 border border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 text-xs font-semibold">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-600"></span>
+                      </span>
+                      <span>{currentStep}</span>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 text-xs text-slate-400 dark:text-slate-500 pt-1 font-medium">
+                      <span>Elapsed: {elapsed}s</span>
+                      <span>•</span>
+                      <span>Target: ~{ESTIMATED_SECONDS}s</span>
+                    </div>
                   </div>
                 </div>
-
-                <p className="text-xs text-center text-slate-400 dark:text-slate-500 max-w-xs">
-                  AI is crafting the architecture, lighting balance, and curated furniture layout.
-                </p>
-              </div>
-            )}
+              );
+            })()}
 
             {error && (
               <div className="flex-1 flex flex-col items-center justify-center">
@@ -285,11 +357,22 @@ export default function InspirationalDesignPage() {
 
             {activeEntry && !loading && (
               <div className="space-y-6 h-full flex flex-col">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Your AI Concept</h3>
-                  <span className="px-3 py-1 bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full border border-green-200 dark:border-green-900">
-                    Ready
-                  </span>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">Your AI Concept</h3>
+                    <span className="px-3 py-1 bg-green-50 dark:bg-green-950/60 text-green-700 dark:text-green-400 text-xs font-semibold rounded-full border border-green-200 dark:border-green-900">
+                      Ready
+                    </span>
+                  </div>
+
+                  {/* Prominent Download Button */}
+                  <button
+                    onClick={() => handleDownload(activeEntry.generatedUrl, `auraspace-concept-${activeEntry.roomType.toLowerCase()}-${Date.now()}.png`)}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-bold shadow-md shadow-violet-500/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download Concept Image</span>
+                  </button>
                 </div>
                 
                 <div className="flex-1 flex justify-center items-center">
@@ -299,14 +382,13 @@ export default function InspirationalDesignPage() {
                     
                     {/* Download overlay */}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <a 
-                        href={activeEntry.generatedUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="px-6 py-2.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-full font-semibold shadow-lg hover:scale-105 transition-transform"
+                      <button 
+                        onClick={() => handleDownload(activeEntry.generatedUrl, `auraspace-concept-${activeEntry.roomType.toLowerCase()}-${Date.now()}.png`)}
+                        className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-full font-semibold shadow-xl hover:scale-105 transition-transform text-sm"
                       >
-                        View Full Size
-                      </a>
+                        <Download className="w-4 h-4" />
+                        Download Image
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -350,6 +432,16 @@ export default function InspirationalDesignPage() {
                     {activeEntry?.id === entry.id && (
                       <CheckCircle2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                     )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(entry.generatedUrl, `auraspace-concept-${entry.roomType.toLowerCase()}-${entry.id}.png`);
+                      }}
+                      title="Download concept"
+                      className="p-1 rounded-md text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/60 transition-colors"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={(e) => handleDeleteEntry(entry.id, e)}
                       title="Delete concept"

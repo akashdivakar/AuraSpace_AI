@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, Sparkles, Box, CheckCircle2, Zap, Shield, Wand2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Box, CheckCircle2, Zap, Shield, Wand2, Building2, Users, Star, BadgeCheck, PhoneCall } from 'lucide-react';
 import CompareSlider from '../components/CompareSlider';
 import AnimateIn from '../components/AnimateIn';
 import PricingSection from '../components/PricingSection';
@@ -308,9 +308,119 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. PRICING SECTION (LAST) */}
+      {/* 6. INTERIOR DESIGN CONSULTATION PARTNER COLLAB SECTION */}
+      <section id="consultation" className="w-full py-16 bg-gradient-to-b from-slate-50 via-indigo-50/30 to-white dark:from-slate-950 dark:via-indigo-950/20 dark:to-slate-900 border-t border-slate-200/80 dark:border-slate-800 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <AnimateIn from="top" className="text-center mb-12 space-y-3">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wider">
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Turnkey Execution Partner Network</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Turn Your AI Staging into Reality
+            </h2>
+            <p className="max-w-2xl mx-auto text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
+              We collaborate with India&apos;s leading interior firms to execute your generated designs. Get free on-site measurements, customized 3D walkthroughs, and turnkey furnishing.
+            </p>
+          </AnimateIn>
+
+          {/* Partner Brands Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            {[
+              {
+                name: 'Livspace India',
+                tag: 'Premier Partner',
+                desc: 'Full home interiors with 10-year warranty & modular precision.',
+                rating: '4.9 ★',
+                delivered: '50k+ Homes',
+                img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=500&auto=format&fit=crop'
+              },
+              {
+                name: 'HomeLane',
+                tag: '45-Day Delivery',
+                desc: 'Fast track modern modular kitchens & space-efficient bedrooms.',
+                rating: '4.8 ★',
+                delivered: '35k+ Homes',
+                img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=500&auto=format&fit=crop'
+              },
+              {
+                name: 'Design Cafe',
+                tag: 'Award Winning',
+                desc: '20% extra space optimization by top certified architects.',
+                rating: '4.9 ★',
+                delivered: '20k+ Homes',
+                img: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=500&auto=format&fit=crop'
+              },
+              {
+                name: 'Decorpot Studio',
+                tag: 'Luxury Curated',
+                desc: 'Bespoke Italian-style interiors with in-house craftsmanship.',
+                rating: '4.7 ★',
+                delivered: '12k+ Homes',
+                img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?q=80&w=500&auto=format&fit=crop'
+              }
+            ].map((p, idx) => (
+              <AnimateIn key={p.name} from="bottom" delay={idx * 80}>
+                <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all h-full flex flex-col justify-between group">
+                  <div className="space-y-3">
+                    <div className="h-32 w-full rounded-2xl overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/95 dark:bg-slate-900/90 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">
+                        {p.tag}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-1">
+                        {p.name}
+                        <BadgeCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                        {p.desc}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-3">
+                    <span className="font-bold text-amber-500">{p.rating}</span>
+                    <span className="text-slate-400 font-medium">{p.delivered}</span>
+                  </div>
+                </div>
+              </AnimateIn>
+            ))}
+          </div>
+
+          {/* CTA Banner */}
+          <AnimateIn from="bottom">
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-indigo-900/50 shadow-2xl">
+              <div className="space-y-2 text-center md:text-left">
+                <h3 className="text-xl sm:text-2xl font-black">
+                  Ready to consult with a Senior Interior Architect?
+                </h3>
+                <p className="text-xs sm:text-sm text-indigo-200 max-w-xl">
+                  Free 1-on-1 consultation • Site measurement • Real material samples • Accurate budget estimate in ₹ INR
+                </p>
+              </div>
+              <Link
+                href="/consultation"
+                className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
+              >
+                <PhoneCall className="w-4 h-4" />
+                <span>Book Free Consultation Call</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </AnimateIn>
+
+        </div>
+      </section>
+
+      {/* 7. PRICING SECTION (LAST) */}
       <PricingSection />
 
     </div>
   );
 }
+

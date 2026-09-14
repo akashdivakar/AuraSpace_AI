@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { 
   ShieldCheck, Users, Activity, HardDrive, Key, CheckCircle2, 
   AlertTriangle, RefreshCw, Layers, ArrowUpRight, Lock, Eye,
-  Trash2, Download, Search, Filter, ShieldAlert, ShoppingBag, Tag
+  Trash2, Download, Search, Filter, ShieldAlert, ShoppingBag, Tag,
+  Building2, Calendar, Phone, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
@@ -34,6 +35,13 @@ const INITIAL_AFFILIATE_SALES = [
   { id: 'sale_90414', productName: 'Arc Brass Floor Standing Lamp', storeName: 'Amazon India', priceINR: 4299, commissionEarnedINR: 258, buyerEmail: 'd.chen@designstudio.io', purchasedAt: '2026-03-13' },
 ];
 
+// Initial mock consultations data
+const INITIAL_CONSULTATIONS = [
+  { id: 'cons_101', partnerId: 'comp_livspace', partnerName: 'Livspace India', customerName: 'Alex Johnson', customerEmail: 'customer@decor8.ai', customerPhone: '+91 98401 23456', city: 'Bangalore', propertyType: '3 BHK Apartment', budgetRange: '₹10 Lakhs - ₹20 Lakhs', preferredDate: '2026-03-18', notes: 'Need Scandinavian living room + modern modular kitchen', status: 'Confirmed', commissionEarnedINR: 1500, createdAt: '2026-03-13' },
+  { id: 'cons_102', partnerId: 'comp_homelane', partnerName: 'HomeLane', customerName: 'Sarah Miller', customerEmail: 'sarah.realty@gmail.com', customerPhone: '+91 98840 98765', city: 'Chennai', propertyType: '2 BHK Apartment', budgetRange: '₹5 Lakhs - ₹10 Lakhs', preferredDate: '2026-03-20', notes: 'Turnkey interior with 45-day handover', status: 'In Progress', commissionEarnedINR: 1500, createdAt: '2026-03-13' },
+  { id: 'cons_103', partnerId: 'comp_designcafe', partnerName: 'Design Cafe', customerName: 'David Chen', customerEmail: 'd.chen@designstudio.io', customerPhone: '+91 97910 11223', city: 'Hyderabad', propertyType: '4+ BHK / Villa', budgetRange: '₹20 Lakhs - ₹50 Lakhs', preferredDate: '2026-03-22', notes: 'Space saving interior design for luxury duplex villa', status: 'Confirmed', commissionEarnedINR: 2000, createdAt: '2026-03-14' },
+];
+
 export default function AdminPage() {
   const { user, isAdmin, switchRole } = useAuth();
   const [usersList, setUsersList] = useState(INITIAL_USERS);
@@ -42,6 +50,7 @@ export default function AdminPage() {
   const [cacheCleared, setCacheCleared] = useState(false);
 
   const [affiliateSales, setAffiliateSales] = useState(INITIAL_AFFILIATE_SALES);
+  const [consultations, setConsultations] = useState(INITIAL_CONSULTATIONS);
 
   useEffect(() => {
     try {
@@ -52,12 +61,22 @@ export default function AdminPage() {
           setAffiliateSales([...parsed, ...INITIAL_AFFILIATE_SALES]);
         }
       }
+
+      const savedConsultations = localStorage.getItem('auraspace_consultations');
+      if (savedConsultations) {
+        const parsedCons = JSON.parse(savedConsultations);
+        if (parsedCons.length > 0) {
+          setConsultations([...parsedCons, ...INITIAL_CONSULTATIONS]);
+        }
+      }
     } catch (e) {
-      console.error('Failed to load affiliate sales', e);
+      console.error('Failed to load storage data', e);
     }
   }, []);
 
   const affiliateEarnings = affiliateSales.reduce((acc, item) => acc + item.commissionEarnedINR, 0);
+  const consultationEarnings = consultations.reduce((acc, item) => acc + item.commissionEarnedINR, 0);
+  const totalMonetization = affiliateEarnings + consultationEarnings;
 
   // Protected route check
   if (!isAdmin) {
@@ -184,37 +203,39 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Metric 3 */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                AuraSpace AI Engine
-              </p>
-              <h3 className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">Healthy</h3>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                Avg Latency: 840ms
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <Activity className="w-6 h-6" />
-            </div>
-          </div>
-
-          {/* Metric 4: Affiliate Commissions */}
+          {/* Metric 3: Total Monetization */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-emerald-200 dark:border-emerald-900/60 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Affiliate Revenue (₹)
+                Total Earnings (₹)
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-                ₹{affiliateEarnings.toLocaleString('en-IN')}
+                ₹{totalMonetization.toLocaleString('en-IN')}
               </h3>
-              <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                {affiliateSales.length} Referred Purchases Tracked
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                Affiliate + Consultation Fees
               </p>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <ShoppingBag className="w-6 h-6" />
+              <DollarSign className="w-6 h-6" />
+            </div>
+          </div>
+
+          {/* Metric 4: Consultation Leads */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-indigo-200 dark:border-indigo-900/60 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                Partner Consultations
+              </p>
+              <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+                {consultations.length}
+              </h3>
+              <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-1">
+                ₹{consultationEarnings.toLocaleString('en-IN')} Lead Referral Fees
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <Building2 className="w-6 h-6" />
             </div>
           </div>
         </div>
@@ -277,6 +298,84 @@ export default function AdminPage() {
                       +₹{sale.commissionEarnedINR.toLocaleString('en-IN')}
                     </td>
                     <td className="py-3 px-3 text-right text-slate-400">{sale.purchasedAt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </AnimateIn>
+
+      {/* NEW: Partner Consultation Bookings & Referral Leads Tracker */}
+      <AnimateIn from="bottom" delay={180}>
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Partner Interior Consultation Leads</h2>
+                <span className="px-2.5 py-0.5 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-bold rounded-full border border-indigo-200 dark:border-indigo-800">
+                  Collab Partners
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Client consultations booked with Livspace, HomeLane, Design Cafe & Decorpot.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-2xl border border-indigo-200 dark:border-indigo-900 text-right">
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Consultation Referral Revenue</p>
+                <p className="text-lg font-black text-indigo-600 dark:text-indigo-400">₹{consultationEarnings.toLocaleString('en-IN')}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-semibold">
+                  <th className="pb-3 px-3">Lead ID</th>
+                  <th className="pb-3 px-3">Design Partner</th>
+                  <th className="pb-3 px-3">Client Contact</th>
+                  <th className="pb-3 px-3">Property & City</th>
+                  <th className="pb-3 px-3">Budget</th>
+                  <th className="pb-3 px-3 text-right">Referral Payout</th>
+                  <th className="pb-3 px-3 text-center">Status</th>
+                  <th className="pb-3 px-3 text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {consultations.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-3 px-3 font-mono text-slate-500 font-semibold">{item.id}</td>
+                    <td className="py-3 px-3 font-bold text-indigo-600 dark:text-indigo-400">
+                      {item.partnerName}
+                    </td>
+                    <td className="py-3 px-3">
+                      <p className="font-semibold text-slate-900 dark:text-white">{item.customerName}</p>
+                      <p className="text-[11px] text-slate-400">{item.customerEmail} • {item.customerPhone}</p>
+                    </td>
+                    <td className="py-3 px-3">
+                      <p className="font-medium text-slate-700 dark:text-slate-300">{item.propertyType}</p>
+                      <p className="text-[11px] text-slate-400">{item.city}</p>
+                    </td>
+                    <td className="py-3 px-3 font-semibold text-slate-700 dark:text-slate-300">
+                      {item.budgetRange}
+                    </td>
+                    <td className="py-3 px-3 text-right font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30">
+                      +₹{item.commissionEarnedINR.toLocaleString('en-IN')}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        item.status === 'Confirmed' 
+                          ? 'bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
+                          : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right text-slate-400">{item.createdAt}</td>
                   </tr>
                 ))}
               </tbody>

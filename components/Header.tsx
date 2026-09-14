@@ -40,6 +40,7 @@ export default function Header() {
           <Link href="/virtual-staging" className="px-2 py-1.5 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap hidden xl:inline-block">Virtual Staging</Link>
           <Link href="/inspirational-design" className="px-2 py-1.5 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap hidden xl:inline-block">Inspirational Design</Link>
           <Link href="/pricing" className="px-2 py-1.5 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap">Pricing (₹)</Link>
+          <Link href="/consultation" className="px-2 py-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all whitespace-nowrap font-bold">Free Consultation</Link>
 
           {/* Customer Live Credits Pill */}
           {isAuthenticated && isCustomer && user && (
@@ -182,6 +183,10 @@ export default function Header() {
             <Link href="/virtual-staging" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">📦 Virtual Staging</Link>
             <Link href="/inspirational-design" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">✨ Inspirational Design</Link>
             <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">💰 Pricing (₹)</Link>
+            <Link href="/consultation" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold transition-colors flex items-center justify-between">
+              <span>🏛️ Free Interior Consultation</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-600 text-white uppercase">Top Brands</span>
+            </Link>
 
             <div className="h-px bg-slate-200 dark:bg-slate-800 my-2" />
 
