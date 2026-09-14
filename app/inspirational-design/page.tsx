@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, Trash2, Download } from 'lucide-react';
+import Link from 'next/link';
+import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, Trash2, Download, Zap } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
 import ProductBreakdown from '../../components/ProductBreakdown';
@@ -346,12 +347,47 @@ export default function InspirationalDesignPage() {
             })()}
 
             {error && (
-              <div className="flex-1 flex flex-col items-center justify-center">
-                <div className="max-w-md p-6 bg-red-50 dark:bg-red-950/40 rounded-2xl border border-red-100 dark:border-red-900 text-center space-y-2">
-                  <X className="w-8 h-8 text-red-500 mx-auto" />
-                  <h3 className="font-semibold text-red-800 dark:text-red-300">Generation Failed</h3>
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-                </div>
+              <div className="flex-1 flex flex-col items-center justify-center p-4">
+                {error.includes('free trial') || error.includes('credit') ? (
+                  <div className="max-w-md w-full p-6 sm:p-8 bg-gradient-to-b from-violet-50/90 via-white to-violet-50/50 dark:from-slate-900 dark:via-slate-850 dark:to-violet-950/40 rounded-3xl border-2 border-violet-200 dark:border-violet-800 text-center shadow-xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="relative mx-auto w-14 h-14 bg-gradient-to-tr from-amber-400 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/20 text-white">
+                      <Zap className="w-7 h-7 fill-white" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[11px] font-extrabold uppercase rounded-full border border-amber-200 dark:border-amber-800">
+                        Credits Exhausted
+                      </span>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                        Unlock More AI Concepts
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        You&apos;ve enjoyed your 3 free creations! Upgrade to the <strong>Pro Plan (₹1,999/mo)</strong> to unlock 200 monthly renders, priority speed, and unlimited downloads.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link
+                        href="/pricing"
+                        className="px-6 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md shadow-violet-500/25 transition-all hover:scale-105 flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span>Upgrade Plan (₹1,999/mo)</span>
+                      </Link>
+                      <button
+                        onClick={() => setError('')}
+                        className="px-4 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+                      >
+                        Maybe Later
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-md p-6 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900 text-center space-y-2">
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{error}</p>
+                    <button onClick={() => setError('')} className="text-xs font-bold text-violet-600 hover:underline pt-1">Try again</button>
+                  </div>
+                )}
               </div>
             )}
 
