@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Building2, Users, Calendar, Clock, Star, Award, ShieldCheck, 
   CheckCircle2, ArrowRight, PhoneCall, Sparkles, MapPin, BadgeCheck,
-  Send, DollarSign, MessageSquare
+  Send, DollarSign, MessageSquare, X, Check, ArrowUpRight
 } from 'lucide-react';
 import AnimateIn from '../../components/AnimateIn';
 import { useAuth } from '../../context/AuthContext';
@@ -136,9 +136,7 @@ export default function ConsultationPage() {
       console.error(err);
     }
 
-    // Trigger explicit alert message
-    alert(`🎉 Consultation Request Received!\n\nThank you ${name || 'Customer'}! Your free interior consultation request with ${selectedCompany.name} has been booked successfully.\n\nA senior design architect from ${selectedCompany.name} will call you at ${phone || 'your phone number'} within 24 hours.`);
-
+    // Open custom rich UI modal
     setBookingSuccess(true);
   };
 
@@ -162,33 +160,89 @@ export default function ConsultationPage() {
         </p>
       </AnimateIn>
 
-      {/* Success Modal Toast */}
+      {/* Custom Modern Success Modal Dialog */}
       {bookingSuccess && (
-        <AnimateIn from="top">
-          <div className="p-6 sm:p-8 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-3xl shadow-2xl space-y-4 max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-10 h-10 text-white" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 space-y-6 animate-in zoom-in-95 duration-200">
+            
+            {/* Close button */}
+            <button
+              onClick={() => setBookingSuccess(false)}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Glowing Icon Header */}
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-emerald-500/30 rounded-full blur-xl animate-pulse"></div>
+                <div className="relative w-16 h-16 bg-gradient-to-tr from-emerald-600 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white">
+                  <CheckCircle2 className="w-9 h-9" />
+                </div>
+              </div>
+
+              <div>
+                <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 text-xs font-extrabold uppercase rounded-full border border-emerald-200 dark:border-emerald-800 tracking-wider">
+                  Request Confirmed
+                </span>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-2">
+                  Consultation Booked!
+                </h3>
+              </div>
             </div>
-            <h3 className="text-2xl font-black">Consultation Booked Successfully!</h3>
-            <p className="text-sm sm:text-base text-emerald-100 max-w-lg mx-auto">
-              We have shared your space details with <span className="font-bold underline">{selectedCompany.name}</span>. A senior design architect will call you within 24 hours to schedule your free 3D design & site walkthrough.
-            </p>
-            <div className="pt-2 flex justify-center gap-3">
+
+            {/* Booking Details Card */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-2.5 text-xs">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-200 dark:border-slate-700/60">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Design Partner</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                  <BadgeCheck className="w-3.5 h-3.5" />
+                  {selectedCompany.name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Client</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{name || 'Alex Johnson'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Location & Space</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{city} • {propertyType}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Estimated Budget</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{budgetRange}</span>
+              </div>
+            </div>
+
+            {/* Next Steps Info */}
+            <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-start gap-3 text-xs text-indigo-900 dark:text-indigo-200">
+              <PhoneCall className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                A senior design architect from <strong className="text-indigo-700 dark:text-indigo-300">{selectedCompany.name}</strong> will call you at <strong className="font-mono">{phone || '+91 97905 63402'}</strong> within 24 hours for your free site walkthrough & 3D layout plan.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setBookingSuccess(false)}
-                className="px-6 py-2.5 bg-white text-emerald-800 rounded-xl font-bold text-xs shadow-md hover:bg-emerald-50 transition-all"
+                className="py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs transition-colors text-center"
               >
-                Book Another Consultation
+                Close & Explore More
               </button>
               <Link
                 href="/dashboard"
-                className="px-6 py-2.5 bg-emerald-700/80 text-white border border-emerald-400 rounded-xl font-bold text-xs hover:bg-emerald-800 transition-all"
+                onClick={() => setBookingSuccess(false)}
+                className="py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
               >
-                Go to Dashboard
+                <span>View Dashboard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
+
           </div>
-        </AnimateIn>
+        </div>
       )}
 
       {/* Main Layout: Partner Cards + Booking Form */}
