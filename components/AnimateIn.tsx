@@ -15,30 +15,33 @@ export default function AnimateIn({
   from = 'bottom',
   delay = 0,
   className = '',
-  threshold = 0.05,
+  threshold = 0.1,
 }: AnimateInProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const show = () => {
-      if (delay > 0) {
-        setTimeout(() => setIsVisible(true), delay);
-      } else {
-        setIsVisible(true);
-      }
-    };
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return;
+    }
+
+    let timeoutId: any;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          show();
+          if (delay > 0) {
+            timeoutId = setTimeout(() => setIsVisible(true), delay);
+          } else {
+            setIsVisible(true);
+          }
           if (ref.current) observer.unobserve(ref.current);
         }
       },
       {
         threshold,
-        rootMargin: '0px 0px 100px 0px', // trigger before element fully enters viewport
+        rootMargin: '0px 0px -40px 0px',
       }
     );
 
@@ -47,12 +50,9 @@ export default function AnimateIn({
       observer.observe(currentRef);
     }
 
-    // Fallback: if element is already in view or observer never fires, show after delay + 400ms
-    const fallback = setTimeout(() => setIsVisible(true), delay + 400);
-
     return () => {
       if (currentRef) observer.unobserve(currentRef);
-      clearTimeout(fallback);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [delay, threshold]);
 
@@ -67,8 +67,8 @@ export default function AnimateIn({
   return (
     <div
       ref={ref}
-      className={`${className} transition-opacity duration-300 ${
-        isVisible ? animationClass : 'opacity-0'
+      className={`${className} ${
+        isVisible ? animationClass : 'opacity-0 pointer-events-none'
       }`}
     >
       {children}
