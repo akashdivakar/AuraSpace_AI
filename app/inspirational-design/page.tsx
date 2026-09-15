@@ -154,7 +154,13 @@ export default function InspirationalDesignPage() {
         }),
       });
 
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        data = { error: 'Server returned an unexpected response format. Please try again.' };
+      }
       if (!res.ok || data.error) throw new Error(data.error || 'Failed to generate');
       
       const images = data.images || [];

@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server';
 import Decor8AI from 'decor8ai';
 
+export const maxDuration = 60;
+export const dynamic = 'force-dynamic';
+
+const DEFAULT_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X3V1aWQiOiJiYTNhNzA5Yi02MDBmLTRlNzctODJiMy1mNDIwZmFhODVjYjkiLCJpYXQiOjE3MzE2MTkwMzJ9.Jhuo8kAZDtxaYO2S3amrsymF0FRFK2PNDzr_XKmxb7Q";
+
 export async function POST(request: Request) {
-  const client = new Decor8AI();
   try {
+    if (!process.env.DECOR8AI_API_KEY) {
+      process.env.DECOR8AI_API_KEY = DEFAULT_API_KEY;
+    }
+    const client = new Decor8AI();
+
     const formData = await request.formData();
     const image = formData.get('image') as File | null;
     const inputImageUrl = formData.get('inputImageUrl') as string | null;

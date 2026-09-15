@@ -508,7 +508,13 @@ export default function VirtualStagingPage() {
       formData.append('prompt', combinedPrompt);
 
       const res = await fetch('/api/virtual-staging', { method: 'POST', body: formData });
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        data = { error: 'Server returned an unexpected response format. Please try again.' };
+      }
       if (!res.ok || data.error) throw new Error(data.error || 'Failed to generate virtual staging');
 
       const images: any[] = data.images || [];
