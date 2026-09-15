@@ -33,9 +33,9 @@ interface AuthContextType {
 }
 
 const DEFAULT_ADMIN: User = {
-  id: 'usr_admin_01',
-  name: 'System Admin',
-  email: 'admin@auraspace.ai',
+  id: 'usr_admin_sarath',
+  name: 'Sarath (System Admin)',
+  email: 'sarath1234@gmail.com',
   role: 'admin',
   createdAt: '2026-01-01',
   creditsRemaining: 9999,
@@ -66,7 +66,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Normalize Pro Plan credits to 100
+        if ((parsed.subscriptionPlan === 'Pro Plan' || parsed.subscriptionPlan === 'Pro Creator') && (parsed.creditsLimit === 200 || !parsed.creditsLimit)) {
+          parsed.creditsLimit = 100;
+          if (parsed.creditsRemaining > 100 || parsed.creditsRemaining === 200) {
+            parsed.creditsRemaining = 100;
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        }
+        setUser(parsed);
       } else {
         setUser(DEFAULT_CUSTOMER);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_CUSTOMER));
@@ -203,9 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const switchRole = (role: UserRole) => {
-    if (role === 'admin') {
-      saveUserSession(DEFAULT_ADMIN);
-    } else {
+    if (role === 'customer') {
       saveUserSession(DEFAULT_CUSTOMER);
     }
   };

@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, Trash2, Download, Zap } from 'lucide-react';
+import { Loader2, Wand2, Sparkles, X, ImageIcon, CheckCircle2, ArrowLeft, ArrowRight, Trash2, Download, Zap, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
 import ProductBreakdown from '../../components/ProductBreakdown';
+import DownloadLockModal from '../../components/DownloadLockModal';
+import PaymentModal, { PlanDetails } from '../../components/PaymentModal';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -22,7 +24,7 @@ interface InspirationEntry {
 }
 
 export default function InspirationalDesignPage() {
-  const { user, deductCredit } = useAuth();
+  const { user, deductCredit, upgradePlan, isAdmin } = useAuth();
   const searchParams = useSearchParams();
   const roomParam = searchParams.get('room')?.toUpperCase();
   const initialRoom = ROOM_TYPES.includes(roomParam || '') ? (roomParam as string) : ROOM_TYPES[0];
@@ -34,7 +36,17 @@ export default function InspirationalDesignPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
+  const [showDownloadLock, setShowDownloadLock] = useState(false);
+  const [paymentPlan, setPaymentPlan] = useState<PlanDetails | null>(null);
   const ESTIMATED_SECONDS = 25;
+
+  const isProOrAbove = user && (
+    isAdmin || 
+    user.subscriptionPlan === 'Pro Plan' || 
+    user.subscriptionPlan === 'Pro Creator' || 
+    user.subscriptionPlan === 'Unlimited Agency' || 
+    user.subscriptionPlan === 'Enterprise Admin'
+  );
 
   useEffect(() => {
     let interval: any;
@@ -80,6 +92,10 @@ export default function InspirationalDesignPage() {
   }, [history]);
 
   const handleDownload = async (url: string, filename = 'auraspace-concept.png') => {
+    if (!isProOrAbove) {
+      setShowDownloadLock(true);
+      return;
+    }
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -96,8 +112,8 @@ export default function InspirationalDesignPage() {
     }
   };
 
-  const handleDeleteEntry = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteEntry = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setHistory(prev => {
       const updated = prev.filter(h => h.id !== id);
       if (updated.length > 0) {
@@ -154,6 +170,17 @@ export default function InspirationalDesignPage() {
       };
 
       deductCredit();
+
+      // Directly update and sync to localStorage for instant availability in dashboard
+      try {
+        const existing = localStorage.getItem('decor8ai_inspirational_history');
+        const list = existing ? JSON.parse(existing) : [];
+        const updated = [newEntry, ...list.filter((x: any) => x.id !== newEntry.id)];
+        localStorage.setItem('decor8ai_inspirational_history', JSON.stringify(updated));
+      } catch (err) {
+        console.error('Failed to sync inspiration to localStorage', err);
+      }
+
       setHistory(prev => [newEntry, ...prev]);
       setActiveEntry(newEntry);
     } catch (err: any) {
@@ -165,6 +192,30 @@ export default function InspirationalDesignPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Download Lock Modal */}
+      <DownloadLockModal
+        isOpen={showDownloadLock}
+        onClose={() => setShowDownloadLock(false)}
+        onUpgradeClick={() => {
+          setPaymentPlan({
+            name: 'Pro Plan',
+            price: '₹1,999',
+            rawPrice: 1999,
+            credits: 100,
+            creditsLabel: '100 AI Image Generations / month',
+          });
+        }}
+      />
+
+      {/* Payment Gateway Modal */}
+      <PaymentModal
+        isOpen={!!paymentPlan}
+        onClose={() => setPaymentPlan(null)}
+        plan={paymentPlan}
+        onSuccess={(planName, creditsLimit) => {
+          upgradePlan(planName, creditsLimit);
+        }}
+      />
       
       {/* Main Row: Controls + Concept Display */}
       <div className="flex flex-col lg:flex-row gap-8 min-h-[550px]">
@@ -362,7 +413,7 @@ export default function InspirationalDesignPage() {
                         Unlock More AI Concepts
                       </h3>
                       <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        You&apos;ve enjoyed your 3 free creations! Upgrade to the <strong>Pro Plan (₹1,999/mo)</strong> to unlock 200 monthly renders, priority speed, and unlimited downloads.
+                        You&apos;ve enjoyed your 3 free creations! Upgrade to the <strong>Pro Plan (₹1,999/mo)</strong> to unlock 100 monthly renders, priority speed, and unlimited downloads.
                       </p>
                     </div>
 
@@ -438,58 +489,79 @@ export default function InspirationalDesignPage() {
 
       </div>
 
-      {/* Bottom: Concept History Gallery (Slide Bottom to Top using AnimateIn) */}
+      {/* Bottom: Latest Generated Concept */}
       {history.length > 0 && (
         <AnimateIn from="bottom" delay={300} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Concept Gallery</h2>
-            <span className="text-sm text-slate-500 dark:text-slate-400">{history.length} concept{history.length > 1 ? 's' : ''} generated</span>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Latest Generated Concept</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Your most recent inspirational design result</p>
+            </div>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-violet-50 dark:hover:bg-violet-950/60 text-slate-700 dark:text-slate-200 hover:text-violet-600 dark:hover:text-violet-400 transition-all border border-slate-200 dark:border-slate-700"
+            >
+              <span>View All ({history.length}) Saved Designs in Dashboard</span>
+              <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {history.map((entry) => (
+          <div className="space-y-8">
+            {history.slice(0, 1).map((entry) => (
               <div key={entry.id}
-                className={`rounded-2xl border-2 transition-all p-4 space-y-3 cursor-pointer ${activeEntry?.id === entry.id ? 'border-violet-500 bg-violet-50/30 dark:bg-violet-950/40' : 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 hover:border-violet-300'}`}
-                onClick={() => setActiveEntry(entry)}
-              >
-                <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 relative group">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={entry.generatedUrl} alt="Concept" className="w-full h-full object-cover" />
-                  {entry.isNew && (
-                    <span className="absolute top-2 right-2 px-2.5 py-1 bg-violet-600 text-white text-xs font-bold rounded-full shadow-sm">NEW</span>
-                  )}
-                </div>
+                className="rounded-2xl border-2 border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850 p-5 space-y-4">
 
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                    {entry.roomType.charAt(0) + entry.roomType.slice(1).toLowerCase()} · {entry.designStyle.charAt(0) + entry.designStyle.slice(1).toLowerCase()}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {activeEntry?.id === entry.id && (
-                      <CheckCircle2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                {/* Header */}
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-1 bg-slate-900 dark:bg-slate-800 text-white dark:text-slate-200 text-xs font-bold rounded-full">
+                      Latest
+                    </span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      {entry.roomType.charAt(0) + entry.roomType.slice(1).toLowerCase()} · {entry.designStyle.charAt(0) + entry.designStyle.slice(1).toLowerCase()}
+                    </span>
+                    {entry.prompt && (
+                      <span className="text-xs text-slate-500 dark:text-slate-400 italic truncate max-w-xs">"{entry.prompt}"</span>
                     )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(entry.generatedUrl, `auraspace-concept-${entry.roomType.toLowerCase()}-${entry.id}.png`);
-                      }}
-                      title="Download concept"
-                      className="p-1 rounded-md text-slate-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/60 transition-colors"
+                      onClick={() => setActiveEntry(entry)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${activeEntry?.id === entry.id ? 'bg-slate-900 dark:bg-slate-700 text-white' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-violet-300 hover:text-violet-600'}`}>
+                      {activeEntry?.id === entry.id
+                        ? <><CheckCircle2 className="w-3.5 h-3.5" /> Viewing</>
+                        : 'View Concept'}
+                    </button>
+                    <Link
+                      href={`/virtual-staging?inputImageUrl=${encodeURIComponent(entry.generatedUrl)}`}
+                      title="Use as input in Virtual Staging Studio"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-xs"
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-3.5 h-3.5" /> Use as Input
+                    </Link>
+                    <button
+                      onClick={() => handleDownload(entry.generatedUrl, `auraspace-concept-${entry.roomType.toLowerCase()}-${entry.id}.png`)}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-700 text-white transition-all shadow-xs">
+                      <Download className="w-3.5 h-3.5" /> Download
                     </button>
                     <button
-                      onClick={(e) => handleDeleteEntry(entry.id, e)}
-                      title="Delete concept"
-                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/60 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      onClick={() => handleDeleteEntry(entry.id)}
+                      title="Delete from history"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-600 text-rose-500 hover:text-white dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white transition-all">
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 </div>
-                {entry.prompt && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 italic truncate">"{entry.prompt}"</p>
-                )}
+
+                {/* Generated Concept Image */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-violet-500 dark:text-violet-400 uppercase tracking-wider">Generated Concept</p>
+                  <div className="w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-violet-200 dark:border-violet-900">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={entry.generatedUrl} alt="Concept" className="w-full h-full object-cover cursor-zoom-in" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>

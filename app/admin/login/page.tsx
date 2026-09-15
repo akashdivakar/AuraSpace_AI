@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
               <input
                 type="email"
                 required
-                placeholder="admin@example.com"
+                placeholder="admin@auraspace.ai"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
@@ -95,19 +95,6 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                Admin Security Token (Optional)
-              </label>
-              <input
-                type="text"
-                placeholder="adm_token_xxxx"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                className="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-              />
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -118,13 +105,10 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
-            <Link href="/admin/register" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-              Create Admin account
-            </Link>
-            <Link href="/login" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+            <Link href="/login" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1.5">
               <UserIcon className="w-3.5 h-3.5" />
-              <span>Switch to Customer Login</span>
+              <span>Switch to Customer Login Portal</span>
             </Link>
           </div>
         </div>

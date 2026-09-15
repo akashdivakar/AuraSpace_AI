@@ -4,12 +4,24 @@ import { useState } from 'react';
 import { CheckCircle2, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AnimateIn from './AnimateIn';
+import PaymentModal, { PlanDetails } from './PaymentModal';
 
 export default function PricingSection() {
   const { user, upgradePlan } = useAuth();
   const [upgradedPlan, setUpgradedPlan] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<PlanDetails | null>(null);
 
-  const handleSelectPlan = (planName: string, creditsLimit: number) => {
+  const handleSelectPlan = (plan: PlanDetails) => {
+    if (plan.rawPrice === 0) {
+      upgradePlan(plan.name, plan.credits);
+      setUpgradedPlan(plan.name);
+      setTimeout(() => setUpgradedPlan(null), 4000);
+    } else {
+      setPaymentPlan(plan);
+    }
+  };
+
+  const handlePaymentSuccess = (planName: string, creditsLimit: number) => {
     upgradePlan(planName, creditsLimit);
     setUpgradedPlan(planName);
     setTimeout(() => setUpgradedPlan(null), 4000);
@@ -17,6 +29,13 @@ export default function PricingSection() {
 
   return (
     <section id="pricing" className="w-full py-20 bg-gradient-to-b from-white via-slate-50/60 to-white dark:from-slate-950 dark:via-slate-900/60 dark:to-slate-950 border-t border-slate-200/80 dark:border-slate-800 relative">
+      {/* Payment Gateway Modal */}
+      <PaymentModal
+        isOpen={!!paymentPlan}
+        onClose={() => setPaymentPlan(null)}
+        plan={paymentPlan}
+        onSuccess={handlePaymentSuccess}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <AnimateIn from="top" className="text-center max-w-3xl mx-auto space-y-4">
@@ -28,7 +47,7 @@ export default function PricingSection() {
             Subscription Plans & AI Credits
           </h2>
           <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-            Choose the perfect plan for your virtual staging needs. Free trial includes 3 image generations, Pro plan offers 200 generations/mo.
+            Choose the perfect plan for your virtual staging needs. Free trial includes 3 image generations, Pro plan offers 100 generations/mo with full downloads & product pricing.
           </p>
         </AnimateIn>
 
@@ -88,7 +107,13 @@ export default function PricingSection() {
 
               <div className="pt-8">
                 <button
-                  onClick={() => handleSelectPlan('Free Trial', 3)}
+                  onClick={() => handleSelectPlan({
+                    name: 'Free Trial',
+                    price: '₹0',
+                    rawPrice: 0,
+                    credits: 3,
+                    creditsLabel: '3 AI Generation Credits (Free)',
+                  })}
                   disabled={user?.subscriptionPlan === 'Free Trial'}
                   className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                     user?.subscriptionPlan === 'Free Trial'
@@ -128,7 +153,15 @@ export default function PricingSection() {
                 <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                    <span className="font-bold text-indigo-600 dark:text-indigo-400">200 Image Generations / month</span>
+                    <span className="font-bold text-indigo-600 dark:text-indigo-400">100 Image Generations / month</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-500" />
+                    <span className="font-semibold text-slate-900 dark:text-white">HD Photorealistic Downloads (Unlocked)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-indigo-500" />
+                    <span className="font-semibold text-slate-900 dark:text-white">Shop the Look Product Price Description (Unlocked)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-indigo-500" />
@@ -136,18 +169,20 @@ export default function PricingSection() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                    <span>Commercial License & Full Downloads</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                    <span>Shop the Look Product Price Detection</span>
+                    <span>Commercial License Included</span>
                   </div>
                 </div>
               </div>
 
               <div className="pt-8">
                 <button
-                  onClick={() => handleSelectPlan('Pro Plan', 200)}
+                  onClick={() => handleSelectPlan({
+                    name: 'Pro Plan',
+                    price: '₹1,999',
+                    rawPrice: 1999,
+                    credits: 100,
+                    creditsLabel: '100 Image Generations / month',
+                  })}
                   disabled={user?.subscriptionPlan === 'Pro Plan'}
                   className={`w-full py-3.5 rounded-xl text-xs font-bold transition-all shadow-lg ${
                     user?.subscriptionPlan === 'Pro Plan'
@@ -202,7 +237,13 @@ export default function PricingSection() {
 
               <div className="pt-8">
                 <button
-                  onClick={() => handleSelectPlan('Unlimited Agency', 9999)}
+                  onClick={() => handleSelectPlan({
+                    name: 'Unlimited Agency',
+                    price: '₹4,999',
+                    rawPrice: 4999,
+                    credits: 9999,
+                    creditsLabel: 'Unlimited Image Generations / month',
+                  })}
                   disabled={user?.subscriptionPlan === 'Unlimited Agency'}
                   className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                     user?.subscriptionPlan === 'Unlimited Agency'

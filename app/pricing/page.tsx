@@ -5,12 +5,26 @@ import Link from 'next/link';
 import { CheckCircle2, Zap, Sparkles, ShieldCheck, ArrowRight, Star, CreditCard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
+import PaymentModal, { PlanDetails } from '../../components/PaymentModal';
 
 export default function PricingPage() {
   const { user, isCustomer, isAdmin, upgradePlan } = useAuth();
   const [upgradedPlan, setUpgradedPlan] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<PlanDetails | null>(null);
 
-  const handleSelectPlan = (planName: string, creditsLimit: number) => {
+  const handleSelectPlan = (plan: PlanDetails) => {
+    if (plan.rawPrice === 0) {
+      // Free plan directly activates
+      upgradePlan(plan.name, plan.credits);
+      setUpgradedPlan(plan.name);
+      setTimeout(() => setUpgradedPlan(null), 4000);
+    } else {
+      // Paid plan triggers payment checkout modal
+      setPaymentPlan(plan);
+    }
+  };
+
+  const handlePaymentSuccess = (planName: string, creditsLimit: number) => {
     upgradePlan(planName, creditsLimit);
     setUpgradedPlan(planName);
     setTimeout(() => setUpgradedPlan(null), 4000);
@@ -18,6 +32,14 @@ export default function PricingPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 space-y-12 pb-16">
+      {/* Payment Gateway Modal */}
+      <PaymentModal
+        isOpen={!!paymentPlan}
+        onClose={() => setPaymentPlan(null)}
+        plan={paymentPlan}
+        onSuccess={handlePaymentSuccess}
+      />
+
       {/* Top Header */}
       <AnimateIn from="top">
         <div className="text-center max-w-3xl mx-auto space-y-4">
@@ -90,7 +112,13 @@ export default function PricingPage() {
 
             <div className="pt-8">
               <button
-                onClick={() => handleSelectPlan('Starter Free', 20)}
+                onClick={() => handleSelectPlan({
+                  name: 'Starter Free',
+                  price: '₹0',
+                  rawPrice: 0,
+                  credits: 20,
+                  creditsLabel: '20 AI Generation Credits / month',
+                })}
                 disabled={user?.subscriptionPlan === 'Starter Free'}
                 className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                   user?.subscriptionPlan === 'Starter Free'
@@ -130,11 +158,15 @@ export default function PricingPage() {
               <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                  <span className="font-bold text-indigo-600 dark:text-indigo-400">200 AI Generation Credits / month</span>
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">100 AI Generation Credits / month</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                  <span>HD Photorealistic 1080p Renders</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">HD Photorealistic Downloads (Unlocked)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-indigo-500" />
+                  <span className="font-semibold text-slate-900 dark:text-white">Shop the Look Product Price Description (Unlocked)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500" />
@@ -142,18 +174,20 @@ export default function PricingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                  <span>Commercial License & HD Downloads</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-indigo-500" />
-                  <span>Custom Style Prompts & Fine-Tuning</span>
+                  <span>Commercial License Included</span>
                 </div>
               </div>
             </div>
 
             <div className="pt-8">
               <button
-                onClick={() => handleSelectPlan('Pro Creator', 200)}
+                onClick={() => handleSelectPlan({
+                  name: 'Pro Creator',
+                  price: '₹1,999',
+                  rawPrice: 1999,
+                  credits: 100,
+                  creditsLabel: '100 AI Generation Credits / month',
+                })}
                 disabled={user?.subscriptionPlan === 'Pro Creator'}
                 className={`w-full py-3.5 rounded-xl text-xs font-bold transition-all shadow-lg ${
                   user?.subscriptionPlan === 'Pro Creator'
@@ -212,7 +246,13 @@ export default function PricingPage() {
 
             <div className="pt-8">
               <button
-                onClick={() => handleSelectPlan('Unlimited Agency', 9999)}
+                onClick={() => handleSelectPlan({
+                  name: 'Unlimited Agency',
+                  price: '₹4,999',
+                  rawPrice: 4999,
+                  credits: 9999,
+                  creditsLabel: 'Unlimited AI Generation Credits / month',
+                })}
                 disabled={user?.subscriptionPlan === 'Unlimited Agency'}
                 className={`w-full py-3 rounded-xl text-xs font-bold transition-all ${
                   user?.subscriptionPlan === 'Unlimited Agency'

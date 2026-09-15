@@ -13,8 +13,8 @@ import AnimateIn from '../../components/AnimateIn';
 
 // Mock registered accounts data for Admin view
 const INITIAL_USERS = [
-  { id: 'usr_01', name: 'System Admin', email: 'admin@decor8.ai', role: 'admin', status: 'Active', renders: 42, joined: '2026-01-01' },
-  { id: 'usr_02', name: 'Alex Johnson', email: 'customer@decor8.ai', role: 'customer', status: 'Active', renders: 18, joined: '2026-02-15' },
+  { id: 'usr_01', name: 'Sarath (System Admin)', email: 'sarath1234@gmail.com', role: 'admin', status: 'Active', renders: 42, joined: '2026-01-01' },
+  { id: 'usr_02', name: 'Alex Johnson', email: 'customer@auraspace.ai', role: 'customer', status: 'Active', renders: 18, joined: '2026-02-15' },
   { id: 'usr_03', name: 'Sarah Miller (Real Estate)', email: 'sarah.realty@gmail.com', role: 'customer', status: 'Active', renders: 34, joined: '2026-02-28' },
   { id: 'usr_04', name: 'David Chen (Interior Architect)', email: 'd.chen@designstudio.io', role: 'customer', status: 'Active', renders: 56, joined: '2026-03-04' },
   { id: 'usr_05', name: 'Elena Rostova', email: 'elena@luxurystaging.com', role: 'customer', status: 'Active', renders: 29, joined: '2026-03-10' },
@@ -43,7 +43,7 @@ const INITIAL_CONSULTATIONS = [
 ];
 
 export default function AdminPage() {
-  const { user, isAdmin, switchRole } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [usersList, setUsersList] = useState(INITIAL_USERS);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'customer'>('all');
@@ -91,22 +91,21 @@ export default function AdminPage() {
               Admin Access Restricted
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-              You are currently logged in as a <span className="font-bold text-slate-800 dark:text-slate-200 uppercase">{user?.role || 'Guest'}</span>. Only accounts with the Administrator role can access this panel.
+              You are currently logged in as a <span className="font-bold text-slate-800 dark:text-slate-200 uppercase">{user?.role || 'Guest'}</span>. Only authorized administrators with valid credentials can access this panel.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => switchRole('admin')}
+              <Link
+                href="/admin/login"
                 className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-500/20"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>Switch to Admin Role Now</span>
-              </button>
+                <span>Sign In with Admin Credentials</span>
+              </Link>
               <Link
-                href="/login"
+                href="/dashboard"
                 className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all"
               >
-                <Lock className="w-4 h-4" />
-                <span>Go to Admin Login</span>
+                <span>Back to Dashboard</span>
               </Link>
             </div>
           </div>

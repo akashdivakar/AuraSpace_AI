@@ -98,6 +98,24 @@ export default function ConsultationPage() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [savedBookingsCount, setSavedBookingsCount] = useState(0);
 
+  // Check URL query params on mount to mark the clicked partner card
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const partnerParam = params.get('partner')?.toLowerCase();
+      if (partnerParam) {
+        const matched = PARTNER_COMPANIES.find(c => 
+          c.id.toLowerCase() === partnerParam ||
+          c.id.toLowerCase().includes(partnerParam) ||
+          c.name.toLowerCase().includes(partnerParam)
+        );
+        if (matched) {
+          setSelectedCompany(matched);
+        }
+      }
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const existing = localStorage.getItem('auraspace_consultations');
@@ -267,7 +285,7 @@ export default function ConsultationPage() {
                 onClick={() => setSelectedCompany(company)}
                 className={`p-5 sm:p-6 rounded-3xl border-2 transition-all cursor-pointer relative ${
                   selectedCompany.id === company.id
-                    ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-xl shadow-indigo-500/10'
+                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/50 ring-4 ring-indigo-500/20 shadow-xl shadow-indigo-500/10'
                     : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
@@ -295,9 +313,20 @@ export default function ConsultationPage() {
                         </p>
                       </div>
 
-                      <span className="px-2.5 py-1 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold uppercase rounded-full border border-indigo-200 dark:border-indigo-800">
-                        {company.badge}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-1 bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] font-extrabold uppercase rounded-full border border-indigo-200 dark:border-indigo-800">
+                          {company.badge}
+                        </span>
+                        {selectedCompany.id === company.id ? (
+                          <span className="px-3 py-1 bg-indigo-600 text-white text-[11px] font-black rounded-full flex items-center gap-1 shadow-md animate-fade-in">
+                            <Check className="w-3.5 h-3.5" /> MARKED
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full hover:text-indigo-600 transition-colors">
+                            Click to Mark
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
@@ -328,15 +357,6 @@ export default function ConsultationPage() {
 
                   </div>
                 </div>
-
-                {selectedCompany.id === company.id && (
-                  <div className="absolute top-3 right-3 sm:top-5 sm:right-5">
-                    <span className="flex h-3 w-3 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-600"></span>
-                    </span>
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -346,6 +366,29 @@ export default function ConsultationPage() {
         <div className="lg:col-span-5 sticky top-24">
           <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
             
+            {/* Selected Partner Highlight Badge */}
+            <div className="p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/80 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0 relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={selectedCompany.featuredImg} alt={selectedCompany.name} className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Marked Consultant
+                  </span>
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1">
+                    {selectedCompany.name}
+                    <BadgeCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Rating: {selectedCompany.rating} ★ • {selectedCompany.projectsCount} Delivered</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold rounded-full">
+                Active
+              </span>
+            </div>
+
             <div>
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
                 <Calendar className="w-4 h-4" />

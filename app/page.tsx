@@ -329,6 +329,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             {[
               {
+                id: 'comp_livspace',
                 name: 'Livspace India',
                 tag: 'Premier Partner',
                 desc: 'Full home interiors with 10-year warranty & modular precision.',
@@ -337,6 +338,7 @@ export default function Home() {
                 img: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=500&auto=format&fit=crop'
               },
               {
+                id: 'comp_homelane',
                 name: 'HomeLane',
                 tag: '45-Day Delivery',
                 desc: 'Fast track modern modular kitchens & space-efficient bedrooms.',
@@ -345,6 +347,7 @@ export default function Home() {
                 img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=500&auto=format&fit=crop'
               },
               {
+                id: 'comp_designcafe',
                 name: 'Design Cafe',
                 tag: 'Award Winning',
                 desc: '20% extra space optimization by top certified architects.',
@@ -353,6 +356,7 @@ export default function Home() {
                 img: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?q=80&w=500&auto=format&fit=crop'
               },
               {
+                id: 'comp_decorpot',
                 name: 'Decorpot Studio',
                 tag: 'Luxury Curated',
                 desc: 'Bespoke Italian-style interiors with in-house craftsmanship.',
@@ -362,18 +366,21 @@ export default function Home() {
               }
             ].map((p, idx) => (
               <AnimateIn key={p.name} from="bottom" delay={idx * 80}>
-                <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all h-full flex flex-col justify-between group">
+                <Link
+                  href={`/consultation?partner=${p.id}`}
+                  className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:border-indigo-500/80 hover:-translate-y-1.5 transition-all duration-300 h-full flex flex-col justify-between group cursor-pointer block"
+                >
                   <div className="space-y-3">
                     <div className="h-32 w-full rounded-2xl overflow-hidden relative bg-slate-100 dark:bg-slate-800">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/95 dark:bg-slate-900/90 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400">
+                      <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-white/95 dark:bg-slate-900/90 text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 shadow-sm">
                         {p.tag}
                       </span>
                     </div>
 
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-1">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {p.name}
                         <BadgeCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                       </h4>
@@ -385,9 +392,11 @@ export default function Home() {
 
                   <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs mt-3">
                     <span className="font-bold text-amber-500">{p.rating}</span>
-                    <span className="text-slate-400 font-medium">{p.delivered}</span>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                      Consult <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
-                </div>
+                </Link>
               </AnimateIn>
             ))}
           </div>

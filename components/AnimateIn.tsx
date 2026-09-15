@@ -15,29 +15,30 @@ export default function AnimateIn({
   from = 'bottom',
   delay = 0,
   className = '',
-  threshold = 0.15,
+  threshold = 0.05,
 }: AnimateInProps) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const show = () => {
+      if (delay > 0) {
+        setTimeout(() => setIsVisible(true), delay);
+      } else {
+        setIsVisible(true);
+      }
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          if (delay > 0) {
-            setTimeout(() => {
-              setIsVisible(true);
-            }, delay);
-          } else {
-            setIsVisible(true);
-          }
-          // Stop observing once element is animated in
+          show();
           if (ref.current) observer.unobserve(ref.current);
         }
       },
       {
         threshold,
-        rootMargin: '0px 0px -50px 0px',
+        rootMargin: '0px 0px 100px 0px', // trigger before element fully enters viewport
       }
     );
 
@@ -46,10 +47,12 @@ export default function AnimateIn({
       observer.observe(currentRef);
     }
 
+    // Fallback: if element is already in view or observer never fires, show after delay + 400ms
+    const fallback = setTimeout(() => setIsVisible(true), delay + 400);
+
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+      if (currentRef) observer.unobserve(currentRef);
+      clearTimeout(fallback);
     };
   }, [delay, threshold]);
 

@@ -150,13 +150,9 @@ export default function CustomerRegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center text-xs text-slate-500 dark:text-slate-400">
             <Link href="/login" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
-              Already registered? Sign In
-            </Link>
-            <Link href="/admin/register" className="font-bold text-slate-600 dark:text-slate-400 hover:underline flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Admin Registration</span>
+              Already registered? Sign in to your account
             </Link>
           </div>
         </div>

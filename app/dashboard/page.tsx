@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { User as UserIcon, LayoutDashboard, Sparkles, Wand2, History, ArrowRight, Trash2, Clock, CheckCircle2, Zap, Star, ShieldCheck, Download, ImageIcon, Filter, RefreshCw } from 'lucide-react';
+import { User as UserIcon, LayoutDashboard, Sparkles, Wand2, History, ArrowRight, Trash2, Clock, CheckCircle2, Zap, Star, ShieldCheck, Download, ImageIcon, Filter, RefreshCw, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AnimateIn from '../../components/AnimateIn';
+import PaymentModal, { PlanDetails } from '../../components/PaymentModal';
+import DownloadLockModal from '../../components/DownloadLockModal';
 
 interface SavedProject {
   id: string;
@@ -18,59 +20,96 @@ interface SavedProject {
 }
 
 export default function CustomerDashboardPage() {
-  const { user, upgradePlan } = useAuth();
+  const { user, upgradePlan, isAdmin } = useAuth();
   const [savedProjects, setSavedProjects] = useState<SavedProject[]>([]);
   const [activeFilter, setActiveFilter] = useState<'all' | 'staging' | 'inspiration'>('all');
   const [upgradedPlan, setUpgradedPlan] = useState<string | null>(null);
+  const [paymentPlan, setPaymentPlan] = useState<PlanDetails | null>(null);
+  const [showDownloadLock, setShowDownloadLock] = useState(false);
+
+  const isProOrAbove = user && (
+    isAdmin || 
+    user.subscriptionPlan === 'Pro Plan' || 
+    user.subscriptionPlan === 'Pro Creator' || 
+    user.subscriptionPlan === 'Unlimited Agency' || 
+    user.subscriptionPlan === 'Enterprise Admin'
+  );
 
   const loadProjects = () => {
     try {
       let projects: SavedProject[] = [];
 
-      const stagingSaved = localStorage.getItem('decor8ai_history');
-      if (stagingSaved) {
-        try {
-          const stagingParsed = JSON.parse(stagingSaved);
-          if (Array.isArray(stagingParsed)) {
-            projects = projects.concat(
-              stagingParsed.map((item: any) => ({
-                id: item.id || `stg_${Math.random()}`,
-                originalImage: item.originalImage,
-                generatedUrl: item.generatedUrl,
-                roomType: item.roomType || 'LIVINGROOM',
-                designStyle: item.designStyle || 'MODERN',
-                prompt: item.prompt || '',
-                type: 'staging',
-                createdAt: item.createdAt || (item.id && !isNaN(Number(item.id)) ? new Date(Number(item.id)).toLocaleDateString() : 'Recent'),
-              }))
-            );
+      // Helper: clean an item's originalImage
+      const cleanOriginal = (item: any) => {
+        const orig = item.originalImage;
+        if (!orig || orig === item.generatedUrl) return null;
+        return orig;
+      };
+
+      // 1. Load Virtual Staging History
+      const stagingKeys = ['decor8ai_history', 'auraspace_staging_history'];
+      for (const key of stagingKeys) {
+        const stagingSaved = localStorage.getItem(key);
+        if (stagingSaved) {
+          try {
+            const stagingParsed = JSON.parse(stagingSaved);
+            if (Array.isArray(stagingParsed)) {
+              stagingParsed.forEach((item: any) => {
+                if (item && item.generatedUrl && !projects.some(p => p.id === item.id || p.generatedUrl === item.generatedUrl)) {
+                  projects.push({
+                    id: item.id || `stg_${Date.now()}_${Math.random()}`,
+                    originalImage: cleanOriginal(item),
+                    generatedUrl: item.generatedUrl,
+                    roomType: item.roomType || 'LIVINGROOM',
+                    designStyle: item.designStyle || 'MODERN',
+                    prompt: item.prompt || '',
+                    type: 'staging',
+                    createdAt: item.createdAt || (item.id && !isNaN(Number(item.id)) ? new Date(Number(item.id)).toLocaleDateString() : 'Recent'),
+                  });
+                }
+              });
+            }
+          } catch (err) {
+            console.error(`Error parsing ${key}:`, err);
           }
-        } catch (err) {
-          console.error('Error parsing staging history:', err);
         }
       }
 
-      const inspSaved = localStorage.getItem('decor8ai_inspirational_history');
-      if (inspSaved) {
-        try {
-          const inspParsed = JSON.parse(inspSaved);
-          if (Array.isArray(inspParsed)) {
-            projects = projects.concat(
-              inspParsed.map((item: any) => ({
-                id: item.id || `inspo_${Math.random()}`,
-                generatedUrl: item.generatedUrl,
-                roomType: item.roomType || 'LIVINGROOM',
-                designStyle: item.designStyle || 'MODERN',
-                prompt: item.prompt || '',
-                type: 'inspiration',
-                createdAt: item.createdAt || (item.id && !isNaN(Number(item.id)) ? new Date(Number(item.id)).toLocaleDateString() : 'Recent'),
-              }))
-            );
+      // 2. Load Inspirational Design History
+      const inspKeys = ['decor8ai_inspirational_history', 'auraspace_inspirational_history'];
+      for (const key of inspKeys) {
+        const inspSaved = localStorage.getItem(key);
+        if (inspSaved) {
+          try {
+            const inspParsed = JSON.parse(inspSaved);
+            if (Array.isArray(inspParsed)) {
+              inspParsed.forEach((item: any) => {
+                if (item && item.generatedUrl && !projects.some(p => p.id === item.id || p.generatedUrl === item.generatedUrl)) {
+                  projects.push({
+                    id: item.id || `inspo_${Date.now()}_${Math.random()}`,
+                    generatedUrl: item.generatedUrl,
+                    roomType: item.roomType || 'LIVINGROOM',
+                    designStyle: item.designStyle || 'MODERN',
+                    prompt: item.prompt || '',
+                    type: 'inspiration',
+                    createdAt: item.createdAt || (item.id && !isNaN(Number(item.id)) ? new Date(Number(item.id)).toLocaleDateString() : 'Recent'),
+                  });
+                }
+              });
+            }
+          } catch (err) {
+            console.error(`Error parsing ${key}:`, err);
           }
-        } catch (err) {
-          console.error('Error parsing inspirational history:', err);
         }
       }
+
+      // Sort newest first by ID/timestamp
+      projects.sort((a, b) => {
+        const numA = Number(a.id);
+        const numB = Number(b.id);
+        if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+        return 0;
+      });
 
       setSavedProjects(projects);
     } catch (e) {
@@ -80,9 +119,26 @@ export default function CustomerDashboardPage() {
 
   useEffect(() => {
     loadProjects();
+
+    // Re-load projects whenever the window gains focus or storage changes across tabs
+    const handleStorageOrFocus = () => {
+      loadProjects();
+    };
+
+    window.addEventListener('focus', handleStorageOrFocus);
+    window.addEventListener('storage', handleStorageOrFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleStorageOrFocus);
+      window.removeEventListener('storage', handleStorageOrFocus);
+    };
   }, []);
 
   const handleDownload = async (url: string, filename = 'auraspace-design.png') => {
+    if (!isProOrAbove) {
+      setShowDownloadLock(true);
+      return;
+    }
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -125,7 +181,17 @@ export default function CustomerDashboardPage() {
     setSavedProjects(prev => prev.filter(p => p.id !== id));
   };
 
-  const handleSelectPlan = (planName: string, creditsLimit: number) => {
+  const handleSelectPlan = (plan: PlanDetails) => {
+    if (plan.rawPrice === 0) {
+      upgradePlan(plan.name, plan.credits);
+      setUpgradedPlan(plan.name);
+      setTimeout(() => setUpgradedPlan(null), 4000);
+    } else {
+      setPaymentPlan(plan);
+    }
+  };
+
+  const handlePaymentSuccess = (planName: string, creditsLimit: number) => {
     upgradePlan(planName, creditsLimit);
     setUpgradedPlan(planName);
     setTimeout(() => setUpgradedPlan(null), 4000);
@@ -137,6 +203,29 @@ export default function CustomerDashboardPage() {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Download Lock Modal */}
+      <DownloadLockModal
+        isOpen={showDownloadLock}
+        onClose={() => setShowDownloadLock(false)}
+        onUpgradeClick={() => {
+          setPaymentPlan({
+            name: 'Pro Plan',
+            price: '₹1,999',
+            rawPrice: 1999,
+            credits: 100,
+            creditsLabel: '100 AI Image Generations / month',
+          });
+        }}
+      />
+
+      {/* Payment Gateway Modal */}
+      <PaymentModal
+        isOpen={!!paymentPlan}
+        onClose={() => setPaymentPlan(null)}
+        plan={paymentPlan}
+        onSuccess={handlePaymentSuccess}
+      />
+
       {/* Welcome Banner */}
       <AnimateIn from="top">
         <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
@@ -255,7 +344,13 @@ export default function CustomerDashboardPage() {
                 <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">20 Credits / month</p>
               </div>
               <button
-                onClick={() => handleSelectPlan('Starter Free', 20)}
+                onClick={() => handleSelectPlan({
+                  name: 'Starter Free',
+                  price: '₹0',
+                  rawPrice: 0,
+                  credits: 20,
+                  creditsLabel: '20 Credits / month',
+                })}
                 disabled={user?.subscriptionPlan === 'Starter Free'}
                 className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${
                   user?.subscriptionPlan === 'Starter Free'
@@ -280,10 +375,16 @@ export default function CustomerDashboardPage() {
                   <span className="text-2xl font-black text-slate-900 dark:text-white">₹1,999</span>
                   <span className="text-xs text-slate-500"> / month</span>
                 </div>
-                <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">200 Credits / month · HD Renders</p>
+                <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">100 Credits / month · HD Downloads & Product Prices</p>
               </div>
               <button
-                onClick={() => handleSelectPlan('Pro Creator', 200)}
+                onClick={() => handleSelectPlan({
+                  name: 'Pro Creator',
+                  price: '₹1,999',
+                  rawPrice: 1999,
+                  credits: 100,
+                  creditsLabel: '100 Credits / month · HD Downloads & Product Prices',
+                })}
                 disabled={user?.subscriptionPlan === 'Pro Creator'}
                 className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-md ${
                   user?.subscriptionPlan === 'Pro Creator'
@@ -308,7 +409,13 @@ export default function CustomerDashboardPage() {
                 <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">Unlimited Credits · 4K Renders</p>
               </div>
               <button
-                onClick={() => handleSelectPlan('Unlimited Agency', 9999)}
+                onClick={() => handleSelectPlan({
+                  name: 'Unlimited Agency',
+                  price: '₹4,999',
+                  rawPrice: 4999,
+                  credits: 9999,
+                  creditsLabel: 'Unlimited Credits · 4K Renders',
+                })}
                 disabled={user?.subscriptionPlan === 'Unlimited Agency'}
                 className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${
                   user?.subscriptionPlan === 'Unlimited Agency'
@@ -481,6 +588,14 @@ export default function CustomerDashboardPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
+                        <Link
+                          href={`/virtual-staging?inputImageUrl=${encodeURIComponent(proj.generatedUrl)}`}
+                          title="Use as input in Virtual Staging Studio"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-xs"
+                        >
+                          <ArrowRight className="w-3.5 h-3.5" />
+                          <span>Use as Input</span>
+                        </Link>
                         <button
                           onClick={() => handleDownload(proj.generatedUrl, `auraspace-${proj.type}-${proj.roomType.toLowerCase()}-${proj.id}.png`)}
                           title="Download high-res image"
@@ -501,7 +616,7 @@ export default function CustomerDashboardPage() {
                     </div>
 
                     {/* Images */}
-                    {proj.originalImage ? (
+                    {proj.originalImage && proj.originalImage !== proj.generatedUrl ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Before (Original)</p>
