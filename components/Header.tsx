@@ -128,13 +128,6 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-1 lg:gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 flex-shrink-0">
 
             <Link
-              href="/"
-              className="px-2 py-1.5 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap"
-            >
-              Home
-            </Link>
-
-            <Link
               href="/#about-us"
               className="px-2 py-1.5 rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all whitespace-nowrap"
             >
@@ -400,14 +393,6 @@ export default function Header() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
             <nav className="flex flex-col px-4 py-4 gap-1 text-sm font-semibold text-slate-700 dark:text-slate-200">
-
-              <Link
-                href="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                🏠 Home
-              </Link>
 
               <Link
                 href="/#about-us"
